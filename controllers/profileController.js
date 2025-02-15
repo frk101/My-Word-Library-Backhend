@@ -5,12 +5,23 @@ const multer = require("multer");
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
-    res.json(user);
+    if (!user) {
+      return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
+    }
+
+    res.json({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      profilePicture: user.profilePicture,
+      totalScore: user.totalScore,
+      quizCount: user.quizCount,
+      starRating: user.starRating.toFixed(2), // ⭐ Yıldız değerini iki ondalık basamakla göster
+    });
   } catch (error) {
-    console.log(error);
     res
       .status(500)
-      .json({ message: "Profil bilgileri alınırken hata oluştu", error });
+      .json({ message: "Profil getirilemedi!", error: error.message });
   }
 };
 

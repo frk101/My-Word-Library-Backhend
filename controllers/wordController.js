@@ -12,6 +12,19 @@ exports.addWord = async (req, res) => {
       dueDate,
     } = req.body;
 
+    // 📌 **Kelimenin veya çevirisinin daha önce eklenip eklenmediğini kontrol et**
+    const existingWord = await Word.findOne({
+      userId: req.user.id,
+      $or: [{ word }, { translation }],
+    });
+
+    if (existingWord) {
+      return res.status(400).json({
+        message: "Bu kelime veya çevirisi zaten eklenmiş!",
+      });
+    }
+
+    // ✅ Yeni kelime ekleme işlemi
     const newWord = new Word({
       word,
       wordLanguage,
