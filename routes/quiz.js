@@ -3,10 +3,10 @@ const router = express.Router();
 const {
   getQuizQuestions,
   submitQuiz,
-} = require("../controllers/quizController"); // ✅ submitQuiz eklendi
+} = require("../controllers/quizController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 router.get("/", authMiddleware, getQuizQuestions);
-router.post("/submit", authMiddleware, submitQuiz); // ✅ Quiz cevaplarını gönderme endpointi eklendi
+router.post("/submit", authMiddleware, submitQuiz);
 
 module.exports = router;

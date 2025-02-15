@@ -8,10 +8,8 @@ const authMiddleware = (req, res, next) => {
   }
 
   try {
-    // **"Bearer " kısmını temizle, token sadece JWT olmalı**
     const cleanToken = token.replace("Bearer ", "").trim();
 
-    // **Token'ı çözümle**
     const decoded = jwt.verify(cleanToken, process.env.JWT_SECRET);
     req.user = decoded;
     next();

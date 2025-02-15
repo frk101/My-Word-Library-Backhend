@@ -1,7 +1,6 @@
 const User = require("../models/user");
 const multer = require("multer");
 
-// **1. Kullanıcının Profil Bilgilerini Getir**
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -16,7 +15,7 @@ exports.getProfile = async (req, res) => {
       profilePicture: user.profilePicture,
       totalScore: user.totalScore,
       quizCount: user.quizCount,
-      starRating: user.starRating.toFixed(2), // ⭐ Yıldız değerini iki ondalık basamakla göster
+      starRating: user.starRating.toFixed(2),
     });
   } catch (error) {
     res
@@ -25,7 +24,6 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// **2. Profili Güncelle**
 exports.updateProfile = async (req, res) => {
   try {
     const updatedUser = await User.findByIdAndUpdate(req.user.id, req.body, {
@@ -39,7 +37,6 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// **3. Profil Fotoğrafı Yükleme**
 const storage = multer.diskStorage({
   destination: "./uploads/",
   filename: (req, file, cb) => {
@@ -66,7 +63,6 @@ exports.uploadProfilePicture = [
   },
 ];
 
-// **4. Kullanıcıyı Sil**
 exports.deleteUser = async (req, res) => {
   try {
     await User.findByIdAndDelete(req.user.id);

@@ -15,9 +15,6 @@ exports.registerUser = async (req, res) => {
     const { firstName, lastName, email, password, birthDate, nativeLanguage } =
       req.body;
 
-    console.log("Gelen Veriler:", req.body);
-
-    // **Şifre boş mu veya string mi?**
     if (!password || typeof password !== "string") {
       return res.status(400).json({
         message: "Şifre geçersiz! String formatında olmalıdır.",
@@ -25,24 +22,19 @@ exports.registerUser = async (req, res) => {
       });
     }
 
-    console.log("Şifre tipi:", typeof password);
-
-    // **E-posta zaten kayıtlı mı kontrol et**
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "Bu e-posta zaten kayıtlı" });
     }
 
-    console.log("Şifre hashleniyor...");
-    const hashedPassword = bcrypt.hashSync(password, 10); // 📌 Şifreyi senkron hash'liyoruz.
-    console.log("Şifre hashleme tamamlandı!");
+    const hashedPassword = bcrypt.hashSync(password, 10);
 
     const newUser = new User({
       firstName,
       lastName,
       email,
       password: hashedPassword,
-      birthDate: new Date(birthDate), // 📌 Doğum tarihini `Date` formatına çeviriyoruz
+      birthDate: new Date(birthDate),
       nativeLanguage,
     });
 

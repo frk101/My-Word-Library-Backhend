@@ -38,11 +38,7 @@ exports.submitQuiz = async (req, res) => {
 
 exports.getQuizQuestions = async (req, res) => {
   try {
-    console.log("📌 Quiz API'ye istek geldi...");
-
     const words = await Word.find({ userId: req.user.id });
-
-    console.log("📌 Kullanıcının kelime sayısı:", words.length);
 
     if (words.length < 20) {
       return res
@@ -51,7 +47,6 @@ exports.getQuizQuestions = async (req, res) => {
     }
 
     const quizWords = words.sort(() => 0.5 - Math.random()).slice(0, 20);
-    console.log("📌 Rastgele seçilen 20 kelime:", quizWords.length);
 
     const quizQuestions = quizWords.map((word) => {
       const questionType =
@@ -83,10 +78,7 @@ exports.getQuizQuestions = async (req, res) => {
       }
 
       if (wrongAnswers.length < 3) {
-        console.warn(
-          "❗ Yeterli yanlış seçenek bulunamadı. Yanlış seçenek sayısı:",
-          wrongAnswers.length
-        );
+        console.warn(" Yanlış seçenek sayısı:", wrongAnswers.length);
       }
 
       const options = [...wrongAnswers, correctAnswer].sort(
@@ -102,15 +94,11 @@ exports.getQuizQuestions = async (req, res) => {
       };
     });
 
-    console.log("📌 Quiz soruları oluşturuldu. Toplam:", quizQuestions.length);
     res.json(quizQuestions);
   } catch (error) {
-    console.error("🚨 Quiz API'de hata oluştu:", error);
-    res
-      .status(500)
-      .json({
-        message: "Quiz oluşturulurken hata oluştu!",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Quiz oluşturulurken hata oluştu!",
+      error: error.message,
+    });
   }
 };
