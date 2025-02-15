@@ -22,6 +22,3 @@ app.use("/api/quiz", quizRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log("Server 5001 portunda çalışıyor"));
-
-///frkalbayrak101
-///2IpgTDT5bUWi07Jv
