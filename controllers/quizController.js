@@ -1,15 +1,24 @@
 const User = require("../models/user");
 const Word = require("../models/word");
+const { messages, getLang } = require("../config/messages");
 
 exports.submitQuiz = async (req, res) => {
   try {
     const { answers } = req.body;
+    const lang = getLang(req);
     let score = 0;
 
     for (let ans of answers) {
       const word = await Word.findById(ans.wordId);
-      if (word && word.translation === ans.answer) {
-        score += 10;
+      if (word) {
+        const correctAnswer =
+          ans.type === "word-to-translation"
+            ? word.secondWord.text
+            : word.firstWord.text;
+
+        if (correctAnswer === ans.answer) {
+          score += 10;
+        }
       }
     }
 
@@ -25,25 +34,27 @@ exports.submitQuiz = async (req, res) => {
     }
 
     res.json({
-      message: "Quiz tamamlandı!",
+      message: messages[lang].quizCompleted,
       score,
       starRating: user.starRating.toFixed(2),
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Quiz sonucu kaydedilemedi!", error: error.message });
+    res.status(500).json({
+      message: messages[getLang(req)].quizSubmitError,
+      error: error.message,
+    });
   }
 };
 
 exports.getQuizQuestions = async (req, res) => {
   try {
+    const lang = getLang(req);
     const words = await Word.find({ userId: req.user.id });
 
     if (words.length < 20) {
       return res
         .status(400)
-        .json({ message: "Quiz için en az 20 kelime eklemelisiniz!" });
+        .json({ message: messages[lang].quizNotEnoughWords });
     }
 
     const quizWords = words.sort(() => 0.5 - Math.random()).slice(0, 20);
@@ -56,22 +67,22 @@ exports.getQuizQuestions = async (req, res) => {
         wrongAnswers = [];
 
       if (questionType === "word-to-translation") {
-        correctAnswer = word.translation;
-        questionText = `"${word.word}" kelimesinin çevirisi nedir?`;
+        correctAnswer = word.secondWord.text;
+        questionText = `"${word.firstWord.text}" kelimesinin çevirisi nedir?`;
 
         let possibleTranslations = words
-          .filter((w) => w.translation !== correctAnswer)
-          .map((w) => w.translation)
+          .filter((w) => w.secondWord.text !== correctAnswer)
+          .map((w) => w.secondWord.text)
           .sort(() => 0.5 - Math.random());
 
         wrongAnswers = possibleTranslations.slice(0, 3);
       } else {
-        correctAnswer = word.word;
-        questionText = `"${word.translation}" hangi kelimenin çevirisidir?`;
+        correctAnswer = word.firstWord.text;
+        questionText = `"${word.secondWord.text}" hangi kelimenin çevirisidir?`;
 
         let possibleWords = words
-          .filter((w) => w.word !== correctAnswer)
-          .map((w) => w.word)
+          .filter((w) => w.firstWord.text !== correctAnswer)
+          .map((w) => w.firstWord.text)
           .sort(() => 0.5 - Math.random());
 
         wrongAnswers = possibleWords.slice(0, 3);
@@ -97,7 +108,7 @@ exports.getQuizQuestions = async (req, res) => {
     res.json(quizQuestions);
   } catch (error) {
     res.status(500).json({
-      message: "Quiz oluşturulurken hata oluştu!",
+      message: messages[getLang(req)].quizGenerateError,
       error: error.message,
     });
   }
